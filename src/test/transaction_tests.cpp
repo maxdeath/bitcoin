@@ -147,7 +147,7 @@ BOOST_AUTO_TEST_CASE(tx_valid)
             }
 
             std::string transaction = test[1].get_str();
-            CDataStream stream(ParseHex(transaction), SER_NETWORK, PROTOCOL_VERSION);
+            CDataStream stream(ParseHex(transaction), SER_NETWORK, BTC_PROTOCOL_VERSION);
             CTransaction tx(deserialize, stream);
 
             CValidationState state;
@@ -234,7 +234,7 @@ BOOST_AUTO_TEST_CASE(tx_invalid)
             }
 
             std::string transaction = test[1].get_str();
-            CDataStream stream(ParseHex(transaction), SER_NETWORK, PROTOCOL_VERSION );
+            CDataStream stream(ParseHex(transaction), SER_NETWORK, BTC_PROTOCOL_VERSION );
             CTransaction tx(deserialize, stream);
 
             CValidationState state;
@@ -354,7 +354,7 @@ static void CreateCreditAndSpend(const CKeyStore& keystore, const CScript& outsc
     outputm.vout.resize(1);
     outputm.vout[0].nValue = 1;
     outputm.vout[0].scriptPubKey = outscript;
-    CDataStream ssout(SER_NETWORK, PROTOCOL_VERSION);
+    CDataStream ssout(SER_NETWORK, BTC_PROTOCOL_VERSION);
     ssout << outputm;
     ssout >> output;
     assert(output->vin.size() == 1);
@@ -372,7 +372,7 @@ static void CreateCreditAndSpend(const CKeyStore& keystore, const CScript& outsc
     inputm.vout[0].scriptPubKey = CScript();
     bool ret = SignSignature(keystore, *output, inputm, 0, SIGHASH_ALL);
     assert(ret == success);
-    CDataStream ssin(SER_NETWORK, PROTOCOL_VERSION);
+    CDataStream ssin(SER_NETWORK, BTC_PROTOCOL_VERSION);
     ssin << inputm;
     ssin >> input;
     assert(input.vin.size() == 1);
@@ -455,7 +455,7 @@ BOOST_AUTO_TEST_CASE(test_big_witness_transaction) {
         assert(hashSigned);
     }
 
-    CDataStream ssout(SER_NETWORK, PROTOCOL_VERSION);
+    CDataStream ssout(SER_NETWORK, BTC_PROTOCOL_VERSION);
     auto vstream = WithOrVersion(&ssout, 0);
     vstream << mtx;
     CTransaction tx(deserialize, vstream);

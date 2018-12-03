@@ -1792,7 +1792,7 @@ void CConnman::ThreadOpenConnections(const std::vector<std::string> connect)
         CSemaphoreGrant grant(*semOutbound);
         if (interruptNet)
             return;
-
+#if 0
         // Add seed nodes if DNS seeds are all down (an infrastructure attack?).
         if (addrman.size() == 0 && (GetTime() - nStart > 60)) {
             static bool done = false;
@@ -1804,7 +1804,7 @@ void CConnman::ThreadOpenConnections(const std::vector<std::string> connect)
                 done = true;
             }
         }
-
+#endif
         //
         // Choose an address to connect to based on most recently seen
         //

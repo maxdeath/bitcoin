@@ -184,10 +184,10 @@ BOOST_AUTO_TEST_CASE( methods ) // GetHex SetHex begin() end() size() GetLow64 G
     BOOST_CHECK(OneL.begin() + 32 == OneL.end());
     BOOST_CHECK(MaxL.begin() + 32 == MaxL.end());
     BOOST_CHECK(TmpL.begin() + 32 == TmpL.end());
-    BOOST_CHECK(GetSerializeSize(R1L, PROTOCOL_VERSION) == 32);
-    BOOST_CHECK(GetSerializeSize(ZeroL, PROTOCOL_VERSION) == 32);
+    BOOST_CHECK(GetSerializeSize(R1L, BTC_PROTOCOL_VERSION) == 32);
+    BOOST_CHECK(GetSerializeSize(ZeroL, BTC_PROTOCOL_VERSION) == 32);
 
-    CDataStream ss(0, PROTOCOL_VERSION);
+    CDataStream ss(0, BTC_PROTOCOL_VERSION);
     ss << R1L;
     BOOST_CHECK(ss.str() == std::string(R1Array,R1Array+32));
     ss >> TmpL;
@@ -230,8 +230,8 @@ BOOST_AUTO_TEST_CASE( methods ) // GetHex SetHex begin() end() size() GetLow64 G
     BOOST_CHECK(OneS.begin() + 20 == OneS.end());
     BOOST_CHECK(MaxS.begin() + 20 == MaxS.end());
     BOOST_CHECK(TmpS.begin() + 20 == TmpS.end());
-    BOOST_CHECK(GetSerializeSize(R1S, PROTOCOL_VERSION) == 20);
-    BOOST_CHECK(GetSerializeSize(ZeroS, PROTOCOL_VERSION) == 20);
+    BOOST_CHECK(GetSerializeSize(R1S, BTC_PROTOCOL_VERSION) == 20);
+    BOOST_CHECK(GetSerializeSize(ZeroS, BTC_PROTOCOL_VERSION) == 20);
 
     ss << R1S;
     BOOST_CHECK(ss.str() == std::string(R1Array,R1Array+20));

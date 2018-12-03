@@ -150,7 +150,7 @@ static bool rest_headers(HTTPRequest* req,
 
     switch (rf) {
     case RetFormat::BINARY: {
-        CDataStream ssHeader(SER_NETWORK, PROTOCOL_VERSION);
+        CDataStream ssHeader(SER_NETWORK, BTC_PROTOCOL_VERSION);
         for (const CBlockIndex *pindex : headers) {
             ssHeader << pindex->GetBlockHeader();
         }
@@ -162,7 +162,7 @@ static bool rest_headers(HTTPRequest* req,
     }
 
     case RetFormat::HEX: {
-        CDataStream ssHeader(SER_NETWORK, PROTOCOL_VERSION);
+        CDataStream ssHeader(SER_NETWORK, BTC_PROTOCOL_VERSION);
         for (const CBlockIndex *pindex : headers) {
             ssHeader << pindex->GetBlockHeader();
         }
@@ -222,7 +222,7 @@ static bool rest_block(HTTPRequest* req,
 
     switch (rf) {
     case RetFormat::BINARY: {
-        CDataStream ssBlock(SER_NETWORK, PROTOCOL_VERSION | RPCSerializationFlags());
+        CDataStream ssBlock(SER_NETWORK, BTC_PROTOCOL_VERSION | RPCSerializationFlags());
         ssBlock << block;
         std::string binaryBlock = ssBlock.str();
         req->WriteHeader("Content-Type", "application/octet-stream");
@@ -231,7 +231,7 @@ static bool rest_block(HTTPRequest* req,
     }
 
     case RetFormat::HEX: {
-        CDataStream ssBlock(SER_NETWORK, PROTOCOL_VERSION | RPCSerializationFlags());
+        CDataStream ssBlock(SER_NETWORK, BTC_PROTOCOL_VERSION | RPCSerializationFlags());
         ssBlock << block;
         std::string strHex = HexStr(ssBlock.begin(), ssBlock.end()) + "\n";
         req->WriteHeader("Content-Type", "text/plain");
@@ -359,7 +359,7 @@ static bool rest_tx(HTTPRequest* req, const std::string& strURIPart)
 
     switch (rf) {
     case RetFormat::BINARY: {
-        CDataStream ssTx(SER_NETWORK, PROTOCOL_VERSION | RPCSerializationFlags());
+        CDataStream ssTx(SER_NETWORK, BTC_PROTOCOL_VERSION | RPCSerializationFlags());
         ssTx << tx;
 
         std::string binaryTx = ssTx.str();
@@ -369,7 +369,7 @@ static bool rest_tx(HTTPRequest* req, const std::string& strURIPart)
     }
 
     case RetFormat::HEX: {
-        CDataStream ssTx(SER_NETWORK, PROTOCOL_VERSION | RPCSerializationFlags());
+        CDataStream ssTx(SER_NETWORK, BTC_PROTOCOL_VERSION | RPCSerializationFlags());
         ssTx << tx;
 
         std::string strHex = HexStr(ssTx.begin(), ssTx.end()) + "\n";
@@ -459,7 +459,7 @@ static bool rest_getutxos(HTTPRequest* req, const std::string& strURIPart)
                 if (fInputParsed) //don't allow sending input over URI and HTTP RAW DATA
                     return RESTERR(req, HTTP_BAD_REQUEST, "Combination of URI scheme inputs and raw post data is not allowed");
 
-                CDataStream oss(SER_NETWORK, PROTOCOL_VERSION);
+                CDataStream oss(SER_NETWORK, BTC_PROTOCOL_VERSION);
                 oss << strRequestMutable;
                 oss >> fCheckMemPool;
                 oss >> vOutPoints;
@@ -523,7 +523,7 @@ static bool rest_getutxos(HTTPRequest* req, const std::string& strURIPart)
     case RetFormat::BINARY: {
         // serialize data
         // use exact same output as mentioned in Bip64
-        CDataStream ssGetUTXOResponse(SER_NETWORK, PROTOCOL_VERSION);
+        CDataStream ssGetUTXOResponse(SER_NETWORK, BTC_PROTOCOL_VERSION);
         ssGetUTXOResponse << chainActive.Height() << chainActive.Tip()->GetBlockHash() << bitmap << outs;
         std::string ssGetUTXOResponseString = ssGetUTXOResponse.str();
 
@@ -533,7 +533,7 @@ static bool rest_getutxos(HTTPRequest* req, const std::string& strURIPart)
     }
 
     case RetFormat::HEX: {
-        CDataStream ssGetUTXOResponse(SER_NETWORK, PROTOCOL_VERSION);
+        CDataStream ssGetUTXOResponse(SER_NETWORK, BTC_PROTOCOL_VERSION);
         ssGetUTXOResponse << chainActive.Height() << chainActive.Tip()->GetBlockHash() << bitmap << outs;
         std::string strHex = HexStr(ssGetUTXOResponse.begin(), ssGetUTXOResponse.end()) + "\n";
 

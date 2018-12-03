@@ -3841,7 +3841,7 @@ UniValue walletprocesspsbt(const JSONRPCRequest& request)
     bool complete = FillPSBT(pwallet, psbtx, &txConst, nHashType, sign, bip32derivs);
 
     UniValue result(UniValue::VOBJ);
-    CDataStream ssTx(SER_NETWORK, PROTOCOL_VERSION);
+    CDataStream ssTx(SER_NETWORK, BTC_PROTOCOL_VERSION);
     ssTx << psbtx;
     result.pushKV("psbt", EncodeBase64((unsigned char*)ssTx.data(), ssTx.size()));
     result.pushKV("complete", complete);
@@ -3953,7 +3953,7 @@ UniValue walletcreatefundedpsbt(const JSONRPCRequest& request)
     FillPSBT(pwallet, psbtx, &txConst, 1, false, bip32derivs);
 
     // Serialize the PSBT
-    CDataStream ssTx(SER_NETWORK, PROTOCOL_VERSION);
+    CDataStream ssTx(SER_NETWORK, BTC_PROTOCOL_VERSION);
     ssTx << psbtx;
 
     UniValue result(UniValue::VOBJ);

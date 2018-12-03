@@ -93,7 +93,7 @@ CAmount CTransaction::GetValueOut() const
 
 unsigned int CTransaction::GetTotalSize() const
 {
-    return ::GetSerializeSize(*this, PROTOCOL_VERSION);
+    return ::GetSerializeSize(*this, BTC_PROTOCOL_VERSION);
 }
 
 std::string CTransaction::ToString() const

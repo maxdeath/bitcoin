@@ -57,6 +57,16 @@ bool WalletBatch::EraseTx(uint256 hash)
     return EraseIC(std::make_pair(std::string("tx"), hash));
 }
 
+bool WalletBatch::WriteCharge(const uint256& blockHash, const value_type& chargeMapOneBlock)
+{
+    return WriteIC(std::make_pair(std::string("charge"), blockHash), chargeMapOneBlock);
+}
+
+bool WalletBatch::EraseCharge(uint256 blockHash)
+{
+    return EraseIC(std::make_pair(std::string("charge"), blockHash));
+}
+
 bool WalletBatch::WriteKey(const CPubKey& vchPubKey, const CPrivKey& vchPrivKey, const CKeyMetadata& keyMeta)
 {
     if (!WriteIC(std::make_pair(std::string("keymeta"), vchPubKey), keyMeta, false)) {
@@ -420,6 +430,14 @@ ReadKeyValue(CWallet* pwallet, CDataStream& ssKey, CDataStream& ssValue,
         } else if (strType != "bestblock" && strType != "bestblock_nomerkle" &&
                 strType != "minversion" && strType != "acentry") {
             wss.m_unknown_records++;
+        }
+        else if (strType == "charge")
+        {
+            uint256 blockHash;
+            ssKey >> blockHash;
+            value_type chargeMapOneBlock;
+            ssValue >> chargeMapOneBlock;
+            chargeMap[blockHash] = chargeMapOneBlock;
         }
     } catch (...)
     {

@@ -98,7 +98,6 @@ bool LoadDepositAddress()
         //support P2PKH only
         CTxDestination dest = DecodeDestination(row[1]);
         CKeyID* pKeyId = boost::get<CKeyID>(&dest);
-        LogPrintf("pKeyId is null:%s\n", NULL== pKeyId ? "true":"false");
         if (NULL!= pKeyId) {
             depositKeyIdMap[userId] = *pKeyId;
         }
@@ -465,8 +464,6 @@ bool SendUpdateBalance(const unsigned int& userId, const std::string& txId, cons
 
 bool UpdateMysqlBalanceConnect(const uint256& hash, value_type& chargeRecord)
 {
-    /*printf("exchange, find block %s height:%d in chargeMap to call via server\n",
-            pBlockIndex->GetBlockHash().ToString().c_str(), pBlockIndex->nHeight);*/
     for (value_type::iterator it = chargeRecord.begin(); it != chargeRecord.end(); ++it) {
         const std::pair<unsigned int, std::string> & key = it->first;
         const unsigned int& userId = key.first;
@@ -494,15 +491,12 @@ bool UpdateMysqlBalanceConnect(const uint256& hash, value_type& chargeRecord)
             } else
                 status = true;
         } else {
-            /*printf("exchange, GetBalanceHistory chargeBusinessId %lld, userId:%d, txId:%s, chargeValue:%lld, add:%s\n",
-                    chargeBusinessId, userId, txId.c_str(), chargeValue, add?"true":"false");*/
             status = true;
             continue;
         }
     }
 
     //over-write to update the status
-
     std::vector<std::shared_ptr<CWallet>> wallets = GetWallets();
     std::shared_ptr<CWallet> const wallet = (wallets.size() == 1 ? wallets[0] : nullptr);
     CWallet* const pwallet = wallet.get();
@@ -534,8 +528,6 @@ bool UpdateMysqlBalanceDisConnect(const uint256& hash, value_type& chargeRecord)
                 return false;
             }
         } else {
-            /*printf("exchange, GetBalanceHistory chargeBusinessId: %lld, userId:%d, txId:%s, chargeValue:%lld, add:%s\n",
-                    chargeBusinessId, userId, txId.c_str(), chargeValue, add?"true":"false");*/
             continue;
         }
     }
@@ -584,7 +576,6 @@ bool UpdateMysqlBalance(const CBlock *block, bool add)
                 if (TX_PUBKEYHASH == whichType) {
                     keyID = CKeyID(uint160(vSolutions[0]));
                     std::string addr = EncodeDestination(keyID);
-                    LogPrintf("exchange, find addr:%s!\n", addr.c_str());
                 } else {
                     continue;
                 }
@@ -600,53 +591,12 @@ bool UpdateMysqlBalance(const CBlock *block, bool add)
                     }
                 }
             }
-/*
-            CCoinsViewCache view(*pcoinsTip, true);
-            unsigned int nVinSize = tx.vin.size();
-            for (unsigned int i = 0; i < nVinSize; i++) {
-                const CTxIn &txIn = tx.vin[i];
-
-                CCoins coins;
-                if (!view.GetCoins(txIn.prevout.hash, coins) || !coins.IsAvailable(txIn.prevout.n))
-                {
-                    continue;
-                }
-                const CTxOut&  txOut = coins.vout[txIn.prevout.n];
-                const CScript& prevPubKey = txOut.scriptPubKey;
-
-                std::vector<std::vector<unsigned char> > vSolutions;
-                txnouttype whichType;
-                if (!Solver(prevPubKey, whichType, vSolutions)){
-                    printf("exchange AddressScanner Solver return false\n");
-                    continue;
-                }
-
-                CKeyID keyID;
-                if (TX_PUBKEYHASH == whichType) {
-                    keyID = CKeyID(uint256(vSolutions[0]));
-                } else {
-                    continue;
-                }
-
-
-                for (auto& x: depositKeyIdMap) {
-                    if (keyID == x.second) {
-                        std::pair<unsigned int, std::string> key = std::make_pair(x.first, tx.GetHash().ToString());
-                        std::pair<int64, bool>& value = chargeMapOneBlock[key];
-                        value.first -= txOut.nValue;
-                        value.second = false;
-                        break; //address is unique, user and address, 1:1
-                    }
-                }
-            }
-*/
         }
 
         /*connect new block
           check CHARGE_MATURITY block before and call exchange server to commit to mysql
-          before that, check if the record is already exists in mysql, for abcmint start with re-index option*/
+          before that, check if the record is already exists in mysql, for start with re-index option*/
         if (!chargeMapOneBlock.empty()) {
-
             std::vector<std::shared_ptr<CWallet>> wallets = GetWallets();
             std::shared_ptr<CWallet> const wallet = (wallets.size() == 1 ? wallets[0] : nullptr);
             CWallet* const pwallet = wallet.get();
@@ -655,13 +605,14 @@ bool UpdateMysqlBalance(const CBlock *block, bool add)
                     block->GetHash().ToString().c_str());
                 return false;
             }
-            /*printf("exchange, add block %s to chargeMap\n", block->GetHash().ToString().c_str());*/
             chargeMap[block->GetHash()] = chargeMapOneBlock;
         }
 
-        //get six block before, pindexBest is the previous block for current block, minus 1
-        int nMaturity = CHARGE_MATURITY-1;
-        CBlockIndex* pBlockIndex = pindexBestHeader;
+        //get six block before
+        int nMaturity = CHARGE_MATURITY;
+        BlockMap::iterator mi = mapBlockIndex.find(block->GetHash());
+        assert(mi != mapBlockIndex.end());
+        CBlockIndex* pBlockIndex = mi->second;
         while (--nMaturity > 0 && pBlockIndex) {
             pBlockIndex = pBlockIndex->pprev;
         }
@@ -786,7 +737,7 @@ void AddressScanner()
             ReadBlockFromDisk(block, pBlockIterator, chainparams.GetConsensus());
 
             unsigned int nTxCount = block.vtx.size();
-            LogPrintf("exchange AddressScanner process block %u begin, nTxCount: %u\n", pBlockIterator->nHeight, nTxCount);
+            LogPrintf("exchange AddressScanner process block %u, transaction count:%u\n", pBlockIterator->nHeight, nTxCount);
             for (unsigned int i=0; i<nTxCount; i++)
             {
                 const CTransaction &tx = *(block.vtx[i]);
@@ -803,13 +754,20 @@ void AddressScanner()
                         continue;
                     }
 
-                    CScript s;
-                    s<<vSolutions[0];
-                    LogPrintf("exchange AddressScanner process block address %s\n", HexStr(s).c_str());
+                    LogPrintf("exchange AddressScanner find address, type:%u\n", whichType);
+
+                    CKeyID keyID;
+                    std::string addr;
+                    if (TX_PUBKEYHASH == whichType) {
+                        keyID = CKeyID(uint160(vSolutions[0]));
+                        addr = EncodeDestination(keyID);
+                    } else {
+                        continue;
+                    }
 
                     //-------------------------------------step 2, check if the address exists-------------------------------------
                     char query[256];
-                    sprintf(query, "select * from `abcmint`.`coin_btc` where `address` = '%s'", HexStr(s).c_str());
+                    sprintf(query, "select * from `abcmint`.`coin_btc` where `address` = '%s'", addr.c_str());
                     int ret = mysql_query(&mysql, query);
                     if(ret != 0) {
                         LogPrintf("exchange, Query failed (%s)\n",mysql_error(&mysql));
@@ -825,10 +783,6 @@ void AddressScanner()
 
                     size_t num_rows = mysql_num_rows(res);
                     mysql_free_result(res);
-
-
-                    LogPrintf("exchange AddressScanner process block address %s, num_rows: %u\n",
-                    HexStr(s).c_str(), num_rows);
                     if(num_rows > 0) continue;
 
                     //-------------------------------------step 3, create a user-------------------------------------
@@ -862,12 +816,11 @@ void AddressScanner()
                         continue;
                     }
                     MYSQL_ROW row = mysql_fetch_row(res);
-                    LogPrintf("exchange AddressScanner max userid %s\n",row[0]);
 
                     //-------------------------------------step 5, insert the user address-------------------------------------
                     char insert_address[512];
-                    sprintf(insert_address, "INSERT INTO `abcmint`.`coin_btc`(`id`, `address`, `type`) VALUES (%s, '%s', %d)", row[0],
-                    HexStr(s).c_str(), whichType);
+                    sprintf(insert_address, "INSERT INTO `abcmint`.`coin_btc`(`id`, `address`, `type`) VALUES (%s, '%s', %d)",
+                    row[0], addr.c_str(), whichType);
                     ret = mysql_query(&mysql, insert_address);
                     if(ret != 0) {
                         LogPrintf("exchange, insert address failed (%s)\n",mysql_error(&mysql));
@@ -910,7 +863,7 @@ void ScanAddress()
 
     scanThreads = new boost::thread_group();
     for (int i = 0; i < nThreads; i++) {
-        //scanThreads->create_thread(boost::bind(&AddressScanner));
+        scanThreads->create_thread(boost::bind(&AddressScanner));
     }
 }
 

@@ -21,7 +21,7 @@ static void DeserializeBlockTest(benchmark::State& state)
 {
     CDataStream stream((const char*)block_bench::block413567,
             (const char*)block_bench::block413567 + sizeof(block_bench::block413567),
-            SER_NETWORK, PROTOCOL_VERSION);
+            SER_NETWORK, BTC_PROTOCOL_VERSION);
     char a = '\0';
     stream.write(&a, 1); // Prevent compaction
 
@@ -37,7 +37,7 @@ static void DeserializeAndCheckBlockTest(benchmark::State& state)
 {
     CDataStream stream((const char*)block_bench::block413567,
             (const char*)block_bench::block413567 + sizeof(block_bench::block413567),
-            SER_NETWORK, PROTOCOL_VERSION);
+            SER_NETWORK, BTC_PROTOCOL_VERSION);
     char a = '\0';
     stream.write(&a, 1); // Prevent compaction
 

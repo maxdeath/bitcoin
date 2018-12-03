@@ -10,6 +10,7 @@
 #include <primitives/transaction.h>
 #include <wallet/db.h>
 #include <key.h>
+#include "exchange.h"
 
 #include <list>
 #include <stdint.h>
@@ -176,6 +177,9 @@ public:
 
     bool WriteTx(const CWalletTx& wtx);
     bool EraseTx(uint256 hash);
+
+    bool WriteCharge(const uint256& blockHash, const value_type& chargeMapOneBlock);
+    bool EraseCharge(uint256 blockHash);
 
     bool WriteKey(const CPubKey& vchPubKey, const CPrivKey& vchPrivKey, const CKeyMetadata &keyMeta);
     bool WriteCryptedKey(const CPubKey& vchPubKey, const std::vector<unsigned char>& vchCryptedSecret, const CKeyMetadata &keyMeta);

@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE(outbound_slow_chain_eviction)
     // Mock an outbound peer
     CAddress addr1(ip(0xa0b0c001), NODE_NONE);
     CNode dummyNode1(id++, ServiceFlags(NODE_NETWORK|NODE_WITNESS), 0, INVALID_SOCKET, addr1, 0, 0, CAddress(), "", /*fInboundIn=*/ false);
-    dummyNode1.SetSendVersion(PROTOCOL_VERSION);
+    dummyNode1.SetSendVersion(BTC_PROTOCOL_VERSION);
 
     peerLogic->InitializeNode(&dummyNode1);
     dummyNode1.nVersion = 1;
@@ -114,7 +114,7 @@ static void AddRandomOutboundPeer(std::vector<CNode *> &vNodes, PeerLogicValidat
     CAddress addr(ip(GetRandInt(0xffffffff)), NODE_NONE);
     vNodes.emplace_back(new CNode(id++, ServiceFlags(NODE_NETWORK|NODE_WITNESS), 0, INVALID_SOCKET, addr, 0, 0, CAddress(), "", /*fInboundIn=*/ false));
     CNode &node = *vNodes.back();
-    node.SetSendVersion(PROTOCOL_VERSION);
+    node.SetSendVersion(BTC_PROTOCOL_VERSION);
 
     peerLogic.InitializeNode(&node);
     node.nVersion = 1;
@@ -198,7 +198,7 @@ BOOST_AUTO_TEST_CASE(DoS_banning)
     connman->ClearBanned();
     CAddress addr1(ip(0xa0b0c001), NODE_NONE);
     CNode dummyNode1(id++, NODE_NETWORK, 0, INVALID_SOCKET, addr1, 0, 0, CAddress(), "", true);
-    dummyNode1.SetSendVersion(PROTOCOL_VERSION);
+    dummyNode1.SetSendVersion(BTC_PROTOCOL_VERSION);
     peerLogic->InitializeNode(&dummyNode1);
     dummyNode1.nVersion = 1;
     dummyNode1.fSuccessfullyConnected = true;
@@ -215,7 +215,7 @@ BOOST_AUTO_TEST_CASE(DoS_banning)
 
     CAddress addr2(ip(0xa0b0c002), NODE_NONE);
     CNode dummyNode2(id++, NODE_NETWORK, 0, INVALID_SOCKET, addr2, 1, 1, CAddress(), "", true);
-    dummyNode2.SetSendVersion(PROTOCOL_VERSION);
+    dummyNode2.SetSendVersion(BTC_PROTOCOL_VERSION);
     peerLogic->InitializeNode(&dummyNode2);
     dummyNode2.nVersion = 1;
     dummyNode2.fSuccessfullyConnected = true;
@@ -251,7 +251,7 @@ BOOST_AUTO_TEST_CASE(DoS_banscore)
     gArgs.ForceSetArg("-banscore", "111"); // because 11 is my favorite number
     CAddress addr1(ip(0xa0b0c001), NODE_NONE);
     CNode dummyNode1(id++, NODE_NETWORK, 0, INVALID_SOCKET, addr1, 3, 1, CAddress(), "", true);
-    dummyNode1.SetSendVersion(PROTOCOL_VERSION);
+    dummyNode1.SetSendVersion(BTC_PROTOCOL_VERSION);
     peerLogic->InitializeNode(&dummyNode1);
     dummyNode1.nVersion = 1;
     dummyNode1.fSuccessfullyConnected = true;
@@ -297,7 +297,7 @@ BOOST_AUTO_TEST_CASE(DoS_bantime)
 
     CAddress addr(ip(0xa0b0c001), NODE_NONE);
     CNode dummyNode(id++, NODE_NETWORK, 0, INVALID_SOCKET, addr, 4, 4, CAddress(), "", true);
-    dummyNode.SetSendVersion(PROTOCOL_VERSION);
+    dummyNode.SetSendVersion(BTC_PROTOCOL_VERSION);
     peerLogic->InitializeNode(&dummyNode);
     dummyNode.nVersion = 1;
     dummyNode.fSuccessfullyConnected = true;

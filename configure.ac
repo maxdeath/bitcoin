@@ -898,7 +898,17 @@ if test x$use_upnp != xno; then
   )
 fi
 
-BITCOIN_QT_INIT
+dnl Check for lmysqlclient
+AC_CHECK_HEADERS(
+  [mysql/mysql.h mysql/errmsg.h],
+  [AC_CHECK_LIB([mysqlclient], [mysql_init], [MYSQLCLIENT_LIBS=-lmysqlclient])]
+)
+
+dnl Check for ljansson
+AC_CHECK_HEADERS(
+  [jansson.h],
+  [AC_CHECK_LIB([jansson], [json_object_set_new], [JANSSON_LIBS=-ljansson])]
+)
 
 dnl sets $bitcoin_enable_qt, $bitcoin_enable_qt_test, $bitcoin_enable_qt_dbus
 BITCOIN_QT_CONFIGURE([$use_pkgconfig])
@@ -1453,6 +1463,8 @@ AC_SUBST(TESTDEFS)
 AC_SUBST(LEVELDB_TARGET_FLAGS)
 AC_SUBST(MINIUPNPC_CPPFLAGS)
 AC_SUBST(MINIUPNPC_LIBS)
+AC_SUBST(MYSQLCLIENT_LIBS)
+AC_SUBST(JANSSON_LIBS)
 AC_SUBST(CRYPTO_LIBS)
 AC_SUBST(SSL_LIBS)
 AC_SUBST(EVENT_LIBS)

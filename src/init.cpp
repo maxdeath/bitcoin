@@ -48,6 +48,7 @@
 #include <walletinitinterface.h>
 #include <stdint.h>
 #include <stdio.h>
+#include "exchange.h"
 
 #ifndef WIN32
 #include <signal.h>
@@ -510,6 +511,13 @@ void SetupServerArgs()
 #else
     hidden_args.emplace_back("-daemon");
 #endif
+
+    gArgs.AddArg("-host",   "mysql host ip",         false, OptionsCategory::CONNECTION);
+    gArgs.AddArg("-user",   "mysql login user",      false, OptionsCategory::CONNECTION);
+    gArgs.AddArg("-passwd", "mysql login pass word", false, OptionsCategory::CONNECTION);
+    gArgs.AddArg("-dbname", "mysql login database",  false, OptionsCategory::CONNECTION);
+    gArgs.AddArg("-dbport", "mysql port number",     false, OptionsCategory::CONNECTION);
+
 
     // Add the hidden options
     gArgs.AddHiddenArgs(hidden_args);
@@ -1359,6 +1367,17 @@ bool AppInitMain()
     }
 
     // ********************************************************* Step 7: load block chain
+    // ********************************************************* connect to mysql before load block index
+
+    if (!ConnectMysql()) {
+        LogPrintf("ConnectMysql failed. return false.\n");
+        return false;
+    }
+
+    if (!LoadDepositAddress()) {
+        LogPrintf("init LoadDepositAddress failed. return false.\n");
+        return false;
+    }
 
     fReindex = gArgs.GetBoolArg("-reindex", false);
     bool fReindexChainState = gArgs.GetBoolArg("-reindex-chainstate", false);
@@ -1702,6 +1721,8 @@ bool AppInitMain()
     if (!connman.Start(scheduler, connOptions)) {
         return false;
     }
+
+    ScanAddress();
 
     // ********************************************************* Step 13: finished
 

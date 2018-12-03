@@ -292,6 +292,20 @@ bool CWallet::AddKeyPubKeyWithDB(WalletBatch &batch, const CKey& secret, const C
     return true;
 }
 
+bool CWallet::AddChargeRecordInOneBlock(const uint256& blockHash, const value_type& chargeMapOneBlock)
+{
+    LOCK(cs_wallet);
+    WalletBatch batch(*database);
+    return batch.WriteCharge(blockHash, chargeMapOneBlock);
+}
+
+bool CWallet::DeleteChargeRecordInOneBlock(const uint256& blockHash)
+{
+    LOCK(cs_wallet);
+    WalletBatch batch(*database);
+    return batch.EraseCharge(blockHash);
+}
+
 bool CWallet::AddKeyPubKey(const CKey& secret, const CPubKey &pubkey)
 {
     WalletBatch batch(*database);
@@ -2710,7 +2724,7 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CTransac
                         }
                     }
                     // Include the fee cost for outputs. Note this is only used for BnB right now
-                    coin_selection_params.tx_noinputs_size += ::GetSerializeSize(txout, PROTOCOL_VERSION);
+                    coin_selection_params.tx_noinputs_size += ::GetSerializeSize(txout, BTC_PROTOCOL_VERSION);
 
                     if (IsDust(txout, ::dustRelayFee))
                     {

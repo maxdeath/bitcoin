@@ -140,7 +140,7 @@ BOOST_AUTO_TEST_CASE(sighash_test)
         sho = SignatureHashOld(scriptCode, txTo, nIn, nHashType);
         sh = SignatureHash(scriptCode, txTo, nIn, nHashType, 0, SigVersion::BASE);
         #if defined(PRINT_SIGHASH_JSON)
-        CDataStream ss(SER_NETWORK, PROTOCOL_VERSION);
+        CDataStream ss(SER_NETWORK, BTC_PROTOCOL_VERSION);
         ss << txTo;
 
         std::cout << "\t[\"" ;
@@ -190,7 +190,7 @@ BOOST_AUTO_TEST_CASE(sighash_from_data)
           nHashType = test[3].get_int();
           sigHashHex = test[4].get_str();
 
-          CDataStream stream(ParseHex(raw_tx), SER_NETWORK, PROTOCOL_VERSION);
+          CDataStream stream(ParseHex(raw_tx), SER_NETWORK, BTC_PROTOCOL_VERSION);
           stream >> tx;
 
           CValidationState state;
